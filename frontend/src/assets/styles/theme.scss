@@ -1308,3 +1308,30 @@ html[data-theme='dark'] .code-block {
     transition: none;
   }
 }
+
+/* ============================================================
+   桌面客户端专属：可更换页面背景
+   html[data-bg] 仅由客户端设置（preload 注入 window.runai.isClient 门控），
+   网页端永远不带该属性 → 与网页行为天然隔离；卡片保持自身底色确保可读性
+   ============================================================ */
+html[data-bg='red-black'] body {
+  background:
+    radial-gradient(1200px 620px at 88% -12%, rgba(227, 6, 19, 0.32), transparent 62%),
+    radial-gradient(900px 720px at -12% 112%, rgba(227, 6, 19, 0.18), transparent 58%),
+    linear-gradient(160deg, #17171a 0%, #0b0b0d 52%, #20060a 100%) !important;
+}
+html[data-bg='graphite'] body {
+  background:
+    radial-gradient(1000px 600px at 100% 0%, rgba(255, 255, 255, 0.06), transparent 55%),
+    linear-gradient(160deg, #26262a 0%, #131315 60%, #0e0e10 100%) !important;
+}
+html[data-bg='cloud'] body {
+  background:
+    radial-gradient(1000px 620px at 92% -10%, rgba(227, 6, 19, 0.07), transparent 58%),
+    linear-gradient(165deg, #f7f7f9 0%, #ebebf0 55%, #e2e2e8 100%) !important;
+}
+html[data-bg='image'] body {
+  background:
+    linear-gradient(rgba(8, 8, 10, 0.42), rgba(8, 8, 10, 0.42)),
+    var(--client-bg-image, none) center / cover no-repeat fixed !important;
+}

@@ -8,16 +8,16 @@
 
 | 服务 | 地址 | 说明 |
 |------|------|------|
-| 前端页面 | http://localhost:5173 | Vue + Vite 开发服务器（Apple 风格 UI） |
-| 后端API | http://localhost:8080/api | SpringBoot 内嵌 Tomcat |
-| MCP 端点 | http://localhost:8080/api/mcp | AI 客户端接入（Streamable HTTP + JSON-RPC 2.0） |
-| 平台连接 | http://localhost:5173/connect | 运动 App 绑定 / 同步 / MCP 配置页 |
+| 前端页面 | http://localhost:2020 | Vue + Vite 开发服务器（Apple 风格 UI） |
+| 后端API | http://localhost:2021/api | SpringBoot 内嵌 Tomcat |
+| MCP 端点 | http://localhost:2021/api/mcp | AI 客户端接入（Streamable HTTP + JSON-RPC 2.0） |
+| 平台连接 | http://localhost:2020/connect | 运动 App 绑定 / 同步 / MCP 配置页 |
 
 ## MCP 接入（AI 教练）
 
 ```
 # Claude Code
-claude mcp add --transport http run-ai http://localhost:8080/api/mcp \
+claude mcp add --transport http run-ai http://localhost:2021/api/mcp \
   --header "Authorization: Bearer <MCP令牌>"
 ```
 
@@ -44,7 +44,7 @@ claude mcp add --transport http run-ai http://localhost:8080/api/mcp \
 - 可直接 curl 测试：
 
 ```bash
-curl -X POST http://localhost:8080/api/mcp \
+curl -X POST http://localhost:2021/api/mcp \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}}'
 ```

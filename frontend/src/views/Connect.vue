@@ -453,7 +453,7 @@ async function generateToken(): Promise<void> {
 const mcpConfigSnippet = `{
   "mcpServers": {
     "run-ai": {
-      "url": "http://localhost:8080/api/mcp",
+      "url": "http://localhost:2021/api/mcp",
       "headers": { "Authorization": "Bearer YOUR_MCP_TOKEN" }
     }
   }

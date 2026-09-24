@@ -8,14 +8,14 @@
 ┌─────────────── RunAI.exe（Electron 窗口）───────────────┐
 │  本地静态服务 127.0.0.1:5219                            │
 │    ├─ /            → 内嵌 frontend/dist（SPA）          │
-│    └─ /api/*       → 代理 127.0.0.1:8080（同源，无 CORS）│
-│  后端编排：8080 未监听时自动 `java -jar` 拉起            │
+│    └─ /api/*       → 代理 127.0.0.1:2021（同源，无 CORS）│
+│  后端编排：2021 未监听时自动 `java -jar` 拉起            │
 │    └─ 启动等待页 loading.html（轮询 /__health）          │
 └─────────────────────────────────────────────────────────┘
 ```
 
 - 前端 `axios baseURL = '/api'`（相对路径）→ 客户端零改动。
-- 8080 已被占用（例如开发时 `mvn spring-boot:run` 在跑）→ 直接复用，不会重复启动。
+- 2021 已被占用（例如开发时 `mvn spring-boot:run` 在跑）→ 直接复用，不会重复启动。
 - 后端由客户端拉起时，工作目录为 `client/backend/`（jar 所在目录）。
 
 ## 目录
@@ -23,6 +23,7 @@
 ```
 client/
 ├─ main.js           # Electron 主进程：本地服务 + 代理 + 后端编排
+├─ preload.js        # 预加载桥：仅暴露 window.runai.isClient 标识
 ├─ loading.html      # 后端启动等待页（红黑白主题，自包含无外部依赖）
 ├─ build_icon.ps1    # 生成 build/icon.png（PowerShell System.Drawing）
 ├─ build/icon.png    # 应用图标（红底白 R，256×256）
@@ -80,7 +81,7 @@ Copy-Item target\run-ai-1.0-SNAPSHOT.jar client\backend\ -Force
 | 用途 | 端口 |
 | --- | --- |
 | 客户端本地静态服务（仅 127.0.0.1） | 5219（占用时自动 +1，最多试 5 个） |
-| 后端 API（context-path `/api`） | 8080 |
+| 后端 API（context-path `/api`） | 2021 |
 
 ## 调试
 

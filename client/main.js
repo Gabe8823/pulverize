@@ -1,20 +1,29 @@
 'use strict'
 /**
  * RunAI 桌面客户端
- * - 内置本地静态服务（加载打包进来的 frontend/dist），端口 5219
- * - /api/* 同源代理到本机后端 127.0.0.1:8080（前端 baseURL='/api' 零改动）
- * - 后端未运行时自动拉起打包的 jar（需要本机 Java 21+），并展示启动等待页
+ * - 性能：优先硬件加速（ANGLE D3D11 + 忽略 GPU blocklist + GPU 光栅化 + 零拷贝），
+ *   避免部分机型 GPU 被拉黑后走软件渲染导致的整窗卡顿
+ * - 原生感：移除默认菜单（File/Edit/View/Window）、隐藏系统标题栏，
+ *   由网页渲染自定义标题栏 + Windows 原生窗口按钮覆盖层（titleBarOverlay）
+ * - 本地静态服务 127.0.0.1:5219 提供打包前端；/api/* 同源代理到后端 127.0.0.1:2021
+ * - 后端未运行时自动拉起打包 jar（需 Java 21+），等待页 loading.html 轮询 /__health
  */
-const { app, BrowserWindow, shell } = require('electron')
+const { app, BrowserWindow, Menu, shell } = require('electron')
 const http = require('http')
 const fs = require('fs')
 const path = require('path')
 const net = require('net')
 const { spawn, execFile } = require('child_process')
 
+/* ---- 性能：强制走硬件加速路径 ---- */
+app.commandLine.appendSwitch('ignore-gpu-blocklist')
+app.commandLine.appendSwitch('enable-gpu-rasterization')
+app.commandLine.appendSwitch('enable-zero-copy')
+app.commandLine.appendSwitch('use-angle', 'd3d11')
+
 const BASE_PORT = 5219
 const BACKEND_HOST = '127.0.0.1'
-const BACKEND_PORT = 8080
+const BACKEND_PORT = 2021
 
 const isPackaged = app.isPackaged
 const distDir = isPackaged
@@ -222,19 +231,23 @@ function createServer() {
   })
 }
 
-function listenWithFallback(server, port, tries) {
-  server.once('error', function (err) {
-    if (err && err.code === 'EADDRINUSE' && tries > 0) {
-      listenWithFallback(server, port + 1, tries - 1)
-    } else {
-      app.quit()
+function attachShortcuts(wc) {
+  wc.on('before-input-event', function (event, input) {
+    if (input.type !== 'keyDown') return
+    const ctrl = input.control || input.meta
+    if (input.key === 'F12') {
+      wc.toggleDevTools(); event.preventDefault()
+    } else if (ctrl && input.shift && (input.key === 'i' || input.key === 'I')) {
+      wc.toggleDevTools(); event.preventDefault()
+    } else if (ctrl && (input.key === 'r' || input.key === 'R')) {
+      wc.reload(); event.preventDefault()
+    } else if (ctrl && (input.key === '=' || input.key === '+')) {
+      wc.setZoomLevel(wc.getZoomLevel() + 0.5); event.preventDefault()
+    } else if (ctrl && (input.key === '-' || input.key === '_')) {
+      wc.setZoomLevel(wc.getZoomLevel() - 0.5); event.preventDefault()
+    } else if (ctrl && input.key === '0') {
+      wc.setZoomLevel(0); event.preventDefault()
     }
-  })
-  server.listen(port, '127.0.0.1', function () {
-    log('local server on http://127.0.0.1:' + port)
-    app.whenReady().then(function () {
-      createWindow('http://127.0.0.1:' + port + '/')
-    })
   })
 }
 
@@ -246,11 +259,20 @@ function createWindow(startUrl) {
     minHeight: 680,
     backgroundColor: '#f5f5f7',
     show: false,
-    title: 'RunAI · 智能跑步',
+    title: 'RunAI · 智能跑步数据分析',
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#16161a',
+      symbolColor: '#f5f5f7',
+      height: 40
+    },
     webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: true
+      sandbox: true,
+      spellcheck: false,
+      backgroundThrottling: false
     }
   })
   win.once('ready-to-show', function () { win.show() })
@@ -261,7 +283,27 @@ function createWindow(startUrl) {
   win.webContents.on('did-fail-load', function (e, code, desc) {
     log('did-fail-load', code, desc)
   })
+  attachShortcuts(win.webContents)
   win.loadURL(startUrl)
+}
+
+function listenWithFallback(server, port, tries) {
+  server.once('error', function (err) {
+    if (err && err.code === 'EADDRINUSE' && tries > 0) {
+      listenWithFallback(server, port + 1, tries - 1)
+    } else {
+      app.quit()
+    }
+  })
+  server.listen(port, '127.0.0.1', function () {
+    log('local server on http://127.0.0.1:' + port)
+    // 先探测/拉起后端再开窗：后端已在跑时首屏直达应用，无等待页闪跳
+    refreshBackend()
+      .catch(function () { /* noop */ })
+      .finally(function () {
+        createWindow('http://127.0.0.1:' + port + '/')
+      })
+  })
 }
 
 const gotLock = app.requestSingleInstanceLock()
@@ -277,9 +319,10 @@ if (!gotLock) {
 
   app.whenReady().then(function () {
     backendState.dist = fs.existsSync(path.join(distDir, 'index.html'))
+    // 移除默认英文菜单栏（File/Edit/View/Window），快捷键由 before-input-event 接管
+    Menu.setApplicationMenu(null)
     const server = createServer()
     listenWithFallback(server, BASE_PORT, 5)
-    refreshBackend()
   })
 
   app.on('window-all-closed', function () {
