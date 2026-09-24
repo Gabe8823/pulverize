@@ -1294,6 +1294,29 @@ html[data-theme='dark'] .code-block {
   transition: color 0.15s ease;
 }
 
+/* 错误反馈：水平抖动（表单校验/登录失败时由视图临时挂载） */
+@keyframes a-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+.a-shake {
+  animation: a-shake 0.36s ease;
+}
+
 /* 键盘可达性：focus 可见轮廓 */
 .a-btn:focus-visible,
 .a-seg__item:focus-visible,
@@ -1313,6 +1336,9 @@ html[data-theme='dark'] .code-block {
   .page-fade-enter-active,
   .page-fade-leave-active {
     transition: none;
+  }
+  .a-shake {
+    animation: none;
   }
 }
 
