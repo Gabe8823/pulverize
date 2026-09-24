@@ -103,7 +103,15 @@
             <h2 class="section-title">AI 教练报告</h2>
             <p class="section-desc">基于本周期全部训练数据生成的复盘与建议。</p>
             <p v-if="!report.aiAvailable" class="section-desc ai-unavailable">
-              未检测到可用的 AI 密钥，当前显示规则摘要 —— 配置 DeepSeek Key 后这里会自动切换为 AI 生成。
+              未检测到可用的 AI 密钥，当前显示规则摘要 ——
+              <RouterLink
+                class="text-accent ai-key-link"
+                style="text-decoration: underline"
+                to="/profile#ai-config"
+              >
+                配置 DeepSeek Key
+              </RouterLink>
+              后这里会自动切换为 AI 生成。
             </p>
           </div>
           <div class="ai-actions">

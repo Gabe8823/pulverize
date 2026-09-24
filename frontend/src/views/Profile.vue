@@ -134,7 +134,7 @@
     </section>
 
     <!-- AI 服务接入 -->
-    <section class="section">
+    <section id="ai-config" class="section" style="scroll-margin-top: 76px">
       <div class="section-head">
         <div>
           <h2 class="section-title">AI 服务接入</h2>

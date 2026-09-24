@@ -93,6 +93,13 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  // 支持 /profile#ai-config 之类的锚点跳转（AI 密钥配置入口）
+  scrollBehavior(to, _from, savedPosition) {
+    if (to.hash) {
+      return { el: to.hash, top: 76, behavior: 'smooth' as const }
+    }
+    return savedPosition ?? { left: 0, top: 0 }
+  },
 })
 
 // 路由守卫

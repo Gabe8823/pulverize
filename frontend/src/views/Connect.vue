@@ -97,6 +97,13 @@
             通过 MCP 协议把你的跑步数据安全地交给 AI 助手（如 Claude、Cursor 等）调用。
           </p>
         </div>
+        <RouterLink
+          class="text-accent"
+          style="text-decoration: underline; font-size: 13px; white-space: nowrap"
+          to="/profile#ai-config"
+        >
+          配置 AI 服务密钥 →
+        </RouterLink>
       </div>
 
       <div class="card-grid-2">
