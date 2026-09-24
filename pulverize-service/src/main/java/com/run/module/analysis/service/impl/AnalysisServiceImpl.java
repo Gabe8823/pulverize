@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  * 跑步数据分析
  *
  * - 所有分析维度的 Map key 一律使用中文，前端直接展示（要求：分析界面全中文名称）
- * - aiSummary 优先由大模型生成（AiClient / DeepSeek），未配置 key 时自动降级为规则文案
+ * - aiSummary 优先由大模型生成（AiClient / OpenAI 兼容接口），未配置 key 时自动降级为规则文案
  * - 心率区间: 优先使用 COROS 官方区间（活动 hr_zone_json 中 type=126 分组的 percent/second），
  *            没有同步到心率区间时回退为按用户档案储备心率(HRR)分桶
  * - 分析缓存类型为 FULL_V3（V2 及更早的缓存不再读取：心率区间已改为 COROS 官方数据/HRR 口径，重新分析即得）

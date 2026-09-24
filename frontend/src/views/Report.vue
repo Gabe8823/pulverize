@@ -109,7 +109,7 @@
                 style="text-decoration: underline"
                 to="/profile#ai-config"
               >
-                配置 DeepSeek Key
+                配置 AI 服务
               </RouterLink>
               后这里会自动切换为 AI 生成。
             </p>

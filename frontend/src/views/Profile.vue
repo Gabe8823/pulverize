@@ -138,7 +138,7 @@
       <div class="section-head">
         <div>
           <h2 class="section-title">AI 服务接入</h2>
-          <p class="section-desc">配置 OpenAI 兼容的大模型接口（如 DeepSeek），驱动目标推荐、训练报告与教练点评；密钥仅保存在服务端。</p>
+          <p class="section-desc">配置 OpenAI 兼容的大模型接口（内置 DeepSeek、Kimi、智谱、通义、OpenAI 预设，也支持任意自定义服务），驱动目标推荐、训练报告与教练点评；密钥仅保存在服务端。</p>
         </div>
         <div class="ai-actions">
           <span class="chip" :class="aiSourceChip">{{ aiSourceLabel }}</span>
@@ -150,12 +150,24 @@
       <div class="a-card">
         <div class="row-list">
           <div class="row">
+            <span class="row-label">服务商预设</span>
+            <div class="row-control">
+              <ASelect
+                v-model="aiPreset"
+                :options="aiPresetOptions"
+                placeholder="选择服务商一键填充地址与模型"
+                @change="applyAiPreset"
+              />
+            </div>
+          </div>
+
+          <div class="row">
             <label class="row-label" for="ai-url">接口地址</label>
             <div class="row-control">
               <AInput
                 id="ai-url"
                 v-model="aiForm.baseUrl"
-                placeholder="https://api.deepseek.com/chat/completions"
+                placeholder="https://…/chat/completions"
               />
             </div>
           </div>
@@ -163,7 +175,7 @@
           <div class="row">
             <label class="row-label" for="ai-model">模型名称</label>
             <div class="row-control">
-              <AInput id="ai-model" v-model="aiForm.model" placeholder="deepseek-chat" />
+              <AInput id="ai-model" v-model="aiForm.model" placeholder="模型名称，按服务商填写" />
             </div>
           </div>
 
@@ -240,6 +252,50 @@ const aiForm = reactive({
   model: '',
   apiKey: '',
 })
+
+/* ---- 服务商预设：一键填充接口地址与模型（不含密钥） ---- */
+const aiPreset = ref<string | null>(null)
+const AI_PRESETS: { value: string; label: string; url: string; model: string }[] = [
+  {
+    value: 'deepseek',
+    label: 'DeepSeek',
+    url: 'https://api.deepseek.com/chat/completions',
+    model: 'deepseek-chat',
+  },
+  {
+    value: 'kimi',
+    label: 'Kimi（月之暗面）',
+    url: 'https://api.moonshot.cn/v1/chat/completions',
+    model: 'moonshot-v1-8k',
+  },
+  {
+    value: 'zhipu',
+    label: '智谱 AI（GLM）',
+    url: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+    model: 'glm-4-flash',
+  },
+  {
+    value: 'qwen',
+    label: '通义千问（阿里）',
+    url: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+    model: 'qwen-plus',
+  },
+  {
+    value: 'openai',
+    label: 'OpenAI',
+    url: 'https://api.openai.com/v1/chat/completions',
+    model: 'gpt-4o-mini',
+  },
+  { value: 'custom', label: '自定义（不填充）', url: '', model: '' },
+]
+const aiPresetOptions = AI_PRESETS.map((p) => ({ value: p.value, label: p.label }))
+
+function applyAiPreset(v: string | number | null): void {
+  const hit = AI_PRESETS.find((p) => p.value === v)
+  if (!hit || hit.value === 'custom') return
+  aiForm.baseUrl = hit.url
+  aiForm.model = hit.model
+}
 
 const aiKeyPlaceholder = computed<string>(() =>
   aiKeySet.value && aiKeyMasked.value

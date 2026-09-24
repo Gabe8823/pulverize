@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 大模型对话客户端（OpenAI 兼容协议，默认 DeepSeek）
+ * 大模型对话客户端（OpenAI 兼容协议，服务商与模型由配置决定）
  *
  * 生效配置由 AiConfigProvider 提供（依赖倒置：接口配置由「AI 服务接入」模块落地）：
  * 界面保存的地址/密钥/模型优先，空白字段回退 yml 的 ai.api.* —— 保存后下一次调用即生效，无需重启。

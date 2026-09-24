@@ -2,7 +2,11 @@
   <ClientTitleBar v-if="showChrome" />
   <ClientIntro v-if="showChrome" />
   <div class="app-frame" :class="{ 'app-frame--client': showChrome }">
-    <router-view />
+    <router-view v-slot="{ Component }">
+      <Transition name="page-fade" mode="out-in">
+        <component :is="Component" :key="route.path" />
+      </Transition>
+    </router-view>
   </div>
 </template>
 
@@ -10,9 +14,13 @@
 import ClientTitleBar from './components/client/ClientTitleBar.vue'
 import ClientIntro from './components/client/ClientIntro.vue'
 import { isClient } from './utils/clientTheme'
+import { useRoute } from 'vue-router'
 
 /** 桌面客户端专属 chrome（网页端无 preload 注入，不渲染） */
 const showChrome = isClient()
+
+/** 路由切换过渡：page-fade 定义在 theme.scss（reduced-motion 下已关停） */
+const route = useRoute()
 </script>
 
 <style>

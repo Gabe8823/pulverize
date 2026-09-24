@@ -22,8 +22,9 @@
       </div>
     </div>
 
-    <div v-if="loading" class="a-empty">
-      <span class="a-spinner"></span>
+    <div v-if="loading" class="mm-loading">
+      <div class="mm-load-fig"><ASkeleton :lines="1" :height="240" :radius="18" /></div>
+      <div class="mm-load-side"><ASkeleton :lines="6" :height="14" /></div>
     </div>
     <div v-else-if="error" class="a-empty">
       <div class="a-empty__text">{{ error }}</div>
@@ -390,6 +391,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import ASkeleton from '@/components/ui/ASkeleton.vue'
 import { analysisApi } from '@/api/analysis'
 import type { MuscleDetail, MuscleMap } from '@/types/analysis'
 
@@ -525,6 +527,13 @@ onMounted(load)
 </script>
 
 <style scoped>
+.mm-loading {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+}
+
 .mm-seg {
   display: inline-flex;
   gap: 4px;
