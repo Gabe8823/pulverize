@@ -1,5 +1,5 @@
 import request from './index'
-import type { AnalysisResultVO, MuscleMap, VdotResult } from '@/types/analysis'
+import type { AnalysisResultVO, MuscleDetail, MuscleMap, VdotResult } from '@/types/analysis'
 
 export const analysisApi = {
   /** 重新分析跑步活动（POST） */
@@ -16,4 +16,8 @@ export const analysisApi = {
   /** 肌肉热力图：近 N 天肌群负荷估算（参考高驰 App） */
   getMuscleMap: (days: number) =>
     request.get<any, MuscleMap>('/analysis/muscle-map', { params: { days } }),
+
+  /** 肌群明细：窗口内该肌群的负荷构成、贡献 Top 活动与建议 */
+  getMuscleDetail: (key: string, days: number) =>
+    request.get<any, MuscleDetail>(`/analysis/muscle-map/${key}/detail`, { params: { days } }),
 }

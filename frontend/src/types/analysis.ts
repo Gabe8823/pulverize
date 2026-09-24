@@ -84,3 +84,38 @@ export interface MuscleMap {
   /** 按分数降序 */
   muscles: MuscleItem[]
 }
+
+/** 贡献活动（肌群明细，按贡献占比降序，最多 5 条） */
+export interface MuscleContribution {
+  activityId: number
+  activityName: string
+  /** 运动日期 yyyy-MM-dd */
+  date: string
+  /** 该活动时长（分钟） */
+  minutes: number
+  /** 对该肌群负荷的贡献占比 0-100（一位小数） */
+  percent: number
+}
+
+/** 肌群明细（GET /api/analysis/muscle-map/{key}/detail?days=N） */
+export interface MuscleDetail {
+  key: string
+  name: string
+  view: string
+  /** 负荷分数 0-100 */
+  score: number
+  level: string
+  levelText: string
+  days: number
+  activityCount: number
+  totalMinutes: number
+  /** 刺激该肌群的活动次数 */
+  sessionCount: number
+  /** 刺激该肌群的累计时长（分钟） */
+  muscleMinutes: number
+  /** 参与活动平均强度百分比 0-100，无数据为 null */
+  intensityPercent: number | null
+  contributions: MuscleContribution[]
+  /** 恢复 / 训练建议（中文） */
+  advice: string
+}

@@ -11,6 +11,7 @@ import com.run.module.analysis.entity.RunningAnalysis;
 import com.run.module.analysis.mapper.RunningAnalysisMapper;
 import com.run.module.analysis.service.AnalysisService;
 import com.run.common.math.VdotCalculator;
+import com.run.module.analysis.dto.MuscleDetailVO;
 import com.run.module.analysis.dto.MuscleMapVO;
 import com.run.module.analysis.dto.VdotVO;
 import com.run.module.running.entity.RunningActivity;
@@ -686,9 +687,26 @@ public class AnalysisServiceImpl implements AnalysisService {
     /** 满负荷参考值：约等于 28 天规律训练下主肌群的负荷当量（load >= REF 记 100 分，超出封顶） */
     private static final double MUSCLE_LOAD_REF = 300.0;
 
-    @Override
-    public MuscleMapVO getMuscleMap(Long userId, Integer days) {
-        int window = days == null ? 28 : Math.max(1, Math.min(days, 365));
+    /** 窗口聚合结果：活动列表 + 各肌群负荷当量 + 总时长（分钟） */
+    private static class MuscleWindow {
+        final List<RunningActivity> activities;
+        final Map<String, Double> load;
+        final int totalMinutes;
+
+        MuscleWindow(List<RunningActivity> activities, Map<String, Double> load, int totalMinutes) {
+            this.activities = activities;
+            this.load = load;
+            this.totalMinutes = totalMinutes;
+        }
+    }
+
+    /** 统计窗口归一化：1-365 天，默认 28 */
+    private int normalizeWindow(Integer days) {
+        return days == null ? 28 : Math.max(1, Math.min(days, 365));
+    }
+
+    /** 按窗口聚合各肌群负荷（getMuscleMap 与 muscleDetail 共用同一口径） */
+    private MuscleWindow aggregateMuscleLoad(Long userId, int window) {
         LocalDateTime start = LocalDateTime.now().minusDays(window);
         List<RunningActivity> activities = runningStats.listByRange(userId, start, LocalDateTime.now());
 
@@ -710,39 +728,150 @@ public class AnalysisServiceImpl implements AnalysisService {
                 load.merge(e.getKey(), minutes * intensity * e.getValue(), Double::sum);
             }
         }
+        return new MuscleWindow(activities, load, totalMinutes);
+    }
+
+    /** 分数 -> 等级：返回 {level, levelText}（地图与明细共用唯一阈值口径） */
+    private static String[] levelOf(int score) {
+        if (score >= 70) {
+            return new String[]{"HIGH", "高负荷"};
+        }
+        if (score >= 40) {
+            return new String[]{"MEDIUM", "中等"};
+        }
+        if (score >= 12) {
+            return new String[]{"LOW", "轻度"};
+        }
+        return new String[]{"IDLE", "未激活"};
+    }
+
+    /** key -> 元数据 {key, 中文名, 视图}；未知 key 返回 null */
+    private static String[] metaOf(String key) {
+        if (key != null) {
+            for (String[] meta : MUSCLE_META) {
+                if (meta[0].equals(key)) {
+                    return meta;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public MuscleMapVO getMuscleMap(Long userId, Integer days) {
+        int window = normalizeWindow(days);
+        MuscleWindow agg = aggregateMuscleLoad(userId, window);
 
         List<MuscleMapVO.MuscleItem> muscles = new ArrayList<>();
         for (String[] meta : MUSCLE_META) {
-            double v = load.getOrDefault(meta[0], 0.0);
+            double v = agg.load.getOrDefault(meta[0], 0.0);
             int score = (int) Math.min(100, Math.round(v / MUSCLE_LOAD_REF * 100));
             MuscleMapVO.MuscleItem item = new MuscleMapVO.MuscleItem();
             item.setKey(meta[0]);
             item.setName(meta[1]);
             item.setView(meta[2]);
             item.setScore(score);
-            if (score >= 70) {
-                item.setLevel("HIGH");
-                item.setLevelText("高负荷");
-            } else if (score >= 40) {
-                item.setLevel("MEDIUM");
-                item.setLevelText("中等");
-            } else if (score >= 12) {
-                item.setLevel("LOW");
-                item.setLevelText("轻度");
-            } else {
-                item.setLevel("IDLE");
-                item.setLevelText("未激活");
-            }
+            String[] lv = levelOf(score);
+            item.setLevel(lv[0]);
+            item.setLevelText(lv[1]);
             muscles.add(item);
         }
         muscles.sort((x, y) -> y.getScore() - x.getScore());
 
         MuscleMapVO vo = new MuscleMapVO();
         vo.setDays(window);
-        vo.setActivityCount(activities.size());
-        vo.setTotalMinutes(totalMinutes);
+        vo.setActivityCount(agg.activities.size());
+        vo.setTotalMinutes(agg.totalMinutes);
         vo.setMuscles(muscles);
         return vo;
+    }
+
+    @Override
+    public MuscleDetailVO muscleDetail(Long userId, String key, Integer days) {
+        String[] meta = metaOf(key);
+        if (meta == null) {
+            throw new BizException("未知肌群");
+        }
+        int window = normalizeWindow(days);
+        MuscleWindow agg = aggregateMuscleLoad(userId, window);
+
+        double v = agg.load.getOrDefault(key, 0.0);
+        int score = (int) Math.min(100, Math.round(v / MUSCLE_LOAD_REF * 100));
+        String[] lv = levelOf(score);
+
+        // 逐活动归因：只统计对该肌群权重 > 0 的活动
+        record ContributionItem(RunningActivity activity, double contribution) {
+        }
+        List<ContributionItem> hits = new ArrayList<>();
+        double sum = 0;
+        int sessionCount = 0;
+        int muscleMinutes = 0;
+        double intensitySum = 0;
+        for (RunningActivity a : agg.activities) {
+            Integer durSec = a.getDurationSeconds();
+            if (durSec == null || durSec <= 0) {
+                continue;
+            }
+            double w = muscleWeights(a.getActivityType()).getOrDefault(key, 0.0);
+            if (w <= 0) {
+                continue;
+            }
+            double minutes = durSec / 60.0;
+            double intensity = muscleIntensity(a);
+            double c = minutes * intensity * w;
+            hits.add(new ContributionItem(a, c));
+            sum += c;
+            sessionCount++;
+            muscleMinutes += (int) Math.round(minutes);
+            intensitySum += intensity;
+        }
+        hits.sort((x, y) -> Double.compare(y.contribution(), x.contribution()));
+
+        List<MuscleDetailVO.Contribution> contributions = new ArrayList<>();
+        int top = Math.min(5, hits.size());
+        for (int i = 0; i < top; i++) {
+            ContributionItem hit = hits.get(i);
+            MuscleDetailVO.Contribution c = new MuscleDetailVO.Contribution();
+            c.setActivityId(hit.activity().getId());
+            String name = hit.activity().getActivityName();
+            c.setActivityName(name == null || name.isBlank() ? "未命名活动" : name);
+            LocalDateTime st = hit.activity().getStartTime();
+            c.setDate(st == null ? "-" : st.toLocalDate().toString());
+            c.setMinutes((int) Math.round(hit.activity().getDurationSeconds() / 60.0));
+            c.setPercent(sum > 0 ? Math.round(hit.contribution() / sum * 1000) / 10.0 : 0.0);
+            contributions.add(c);
+        }
+
+        MuscleDetailVO vo = new MuscleDetailVO();
+        vo.setKey(meta[0]);
+        vo.setName(meta[1]);
+        vo.setView(meta[2]);
+        vo.setScore(score);
+        vo.setLevel(lv[0]);
+        vo.setLevelText(lv[1]);
+        vo.setDays(window);
+        vo.setActivityCount(agg.activities.size());
+        vo.setTotalMinutes(agg.totalMinutes);
+        vo.setSessionCount(sessionCount);
+        vo.setMuscleMinutes(muscleMinutes);
+        vo.setIntensityPercent(sessionCount > 0 ? (int) Math.round(intensitySum / sessionCount * 100) : null);
+        vo.setContributions(contributions);
+        vo.setAdvice(adviceOf(lv[0]));
+        return vo;
+    }
+
+    /** 明细建议文案：按等级给出恢复 / 训练提示 */
+    private static String adviceOf(String level) {
+        switch (level) {
+            case "HIGH":
+                return "负荷充足：未来 1-2 天安排休息或低强度交叉训练，注意补充蛋白质与睡眠。";
+            case "MEDIUM":
+                return "中等刺激：保持当前训练节奏，进阶前先确认恢复充分，避免连续堆量。";
+            case "LOW":
+                return "刺激较少：本周可安排 1 次针对性训练补强该肌群，循序渐进。";
+            default:
+                return "窗口内几乎无刺激：可加入交叉训练唤醒该肌群，预防失衡与受伤。";
+        }
     }
 
     /** 单次活动强度 0.50~1.00：优先心率口径（均值相对峰值），无心率按中等强度 0.62 */

@@ -2,6 +2,7 @@ package com.run.module.analysis.controller;
 
 import com.run.common.result.R;
 import com.run.module.analysis.dto.AnalysisResultVO;
+import com.run.module.analysis.dto.MuscleDetailVO;
 import com.run.module.analysis.dto.MuscleMapVO;
 import com.run.module.analysis.dto.VdotVO;
 import com.run.module.analysis.service.AnalysisService;
@@ -45,5 +46,14 @@ public class AnalysisController {
                                     @RequestParam(name = "days", defaultValue = "28") Integer days) {
         Long userId = (Long) request.getAttribute("userId");
         return R.ok(analysisService.getMuscleMap(userId, days));
+    }
+
+    /** 肌群明细：单个肌群在统计窗口内的负荷构成、贡献 Top 活动与建议 */
+    @GetMapping("/muscle-map/{key}/detail")
+    public R<MuscleDetailVO> muscleMapDetail(HttpServletRequest request,
+                                             @PathVariable String key,
+                                             @RequestParam(name = "days", defaultValue = "28") Integer days) {
+        Long userId = (Long) request.getAttribute("userId");
+        return R.ok(analysisService.muscleDetail(userId, key, days));
     }
 }

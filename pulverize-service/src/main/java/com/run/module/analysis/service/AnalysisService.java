@@ -1,6 +1,7 @@
 package com.run.module.analysis.service;
 
 import com.run.module.analysis.dto.AnalysisResultVO;
+import com.run.module.analysis.dto.MuscleDetailVO;
 import com.run.module.analysis.dto.MuscleMapVO;
 import com.run.module.analysis.dto.VdotVO;
 
@@ -17,4 +18,7 @@ public interface AnalysisService {
 
     /** 肌肉热力图：近 days 天按运动类型/时长/强度估算的肌群负荷（参考高驰 App） */
     MuscleMapVO getMuscleMap(Long userId, Integer days);
+
+    /** 肌群明细：窗口内该肌群的负荷构成、贡献 Top 活动与建议 */
+    MuscleDetailVO muscleDetail(Long userId, String key, Integer days);
 }
