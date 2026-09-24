@@ -91,7 +91,7 @@ function trySpawnBackend() {
 }
 
 async function refreshBackend() {
-  backendState.up = await isPortUp(BACKEND_HOST, BACKEND_PORT)
+  backendState.up = await isPortUp(BACKEND_PORT, BACKEND_HOST)
   if (backendState.up) return true
   const now = Date.now()
   if (now - backendState.lastAttempt > 5000) {
