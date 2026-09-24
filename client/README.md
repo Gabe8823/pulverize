@@ -73,7 +73,7 @@ Copy-Item pulverize-service\target\pulverize-1.0-SNAPSHOT.jar client\backend\ -F
 
 - Windows 10/11 x64
 - Java 21+（`java -version` 可用；没有 Java 时客户端会在等待页给出明确提示）
-- MySQL 8（库 `run_ai`，配置在 jar 内 application.yml，默认 root/[REDACTED]@localhost）
+- MySQL 8（库 `run_ai`，配置在 jar 内 application.yml，密码经环境变量 / 本地 keystore 注入）
 - 首次安装包未签名，SmartScreen 提示「更多信息 → 仍要运行」属正常现象
 
 ## 端口

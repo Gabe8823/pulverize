@@ -33,7 +33,7 @@
 | 凭据落点 | `~/.pulverize/{jwt.secret, db.password, accounts.local.md}`（仓库之外，永不入库） | ✅ 存在性与长度校验通过 |
 | 本机 CLI 连接方式 | `mysql -uroot -p` 交互输入（以本地文件为准） | 见 ACCOUNTS.md「连接方式」 |
 
-**注意**：本机 MySQL root 改密后，**其他使用 `root/[REDACTED]` 的项目（如 IDEA 中的 hmall 数据源）需同步更新为 `~/.pulverize/db.password` 中的新密码**。
+**注意**：本机 MySQL root 改密后，**其他配置了旧 root 密码的项目（如 IDEA 中的 hmall 数据源）需同步更新为 `~/.pulverize/db.password` 中的新密码**。
 
 ## 四、密钥装载机制（改造后）
 

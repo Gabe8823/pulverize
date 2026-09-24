@@ -75,7 +75,7 @@
 mysql -uroot -p < sql/init.sql     # 创建 run_ai 库（表结构也会在启动时自动补齐/升级）
 ```
 
-数据源默认 `localhost:3306/run_ai`（root/[REDACTED]，见 `pulverize-service/src/main/resources/application-dev.yml` 按需修改）。Redis/RabbitMQ/OSS 为可选中间件，开发环境已自动排除，不安装也能启动。
+数据源为 `localhost:3306/run_ai`，密码经 `RUNAI_DB_PASSWORD` 环境变量 / `~/.pulverize/db.password` 本地文件注入（yml 仅留占位默认值）。Redis/RabbitMQ/OSS 为可选中间件，开发环境已自动排除，不安装也能启动。
 
 ### 2. 启动后端（端口 2021）
 
