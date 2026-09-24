@@ -123,12 +123,11 @@ SHOW TABLES;
 ## 常用命令
 
 ```bash
-# 启动后端 (打包后运行)
+# 启动后端（根目录一次打包三模块）
 mvn package -DskipTests
-java -jar target/pulverize-1.0-SNAPSHOT.jar --spring.profiles.active=dev
+java -jar pulverize-service/target/pulverize-1.0-SNAPSHOT.jar --spring.profiles.active=dev
 
-# 启动后端 (开发模式，热加载)
-mvn spring-boot:run
+# 说明：多模块后开发环境直接跑打包 jar（mvn spring-boot:run 需先 install 依赖模块，不再推荐）
 
 # 启动前端
 cd frontend
@@ -143,20 +142,13 @@ mysql -uroot -p run_ai < sql/init.sql
 
 ```
 pulverize/
-├── src/main/java/com/run/          # 后端 Java 代码
-│   ├── RunAiApplication.java       # 启动类
-│   ├── common/                     # 公共模块 (配置/异常/工具)
-│   └── module/                     # 业务模块
-│       ├── user/                   # 用户模块
-│       ├── running/                # 跑步记录
-│       ├── analysis/               # 跑步分析
-│       ├── plan/                   # 训练计划
-│       ├── goal/                   # 运动目标
-│       ├── platform/               # 运动平台连接 (SPI + COROS 连接器)
-│       └── mcp/                    # MCP Server (AI 教练接入)
-├── src/main/resources/
-│   ├── application.yml             # 主配置
-│   └── application-dev.yml         # 开发环境配置
+├── pom.xml                         # 父 POM（pulverize-parent，聚合三模块，统一版本管理）
+├── pulverize-common/               # 基础设施：配置/拦截器/异常/R/JwtUtils/AiClient/Vdot
+├── pulverize-api/                  # 对外 DTO 契约（Phase B 承载 Feign 接口定义）
+├── pulverize-service/              # 业务实现 + 启动类 + 资源（唯一产物 pulverize-1.0-SNAPSHOT.jar）
+│   └── src/main/
+│       ├── java/com/run/           # RunAiApplication + module/*（user/running/analysis/plan/goal/platform/mcp/ai）
+│       └── resources/              # application.yml / application-dev.yml
 ├── sql/init.sql                    # 建库建表SQL
 ├── frontend/                       # 前端 Vue 项目
 │   └── src/

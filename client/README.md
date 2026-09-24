@@ -15,7 +15,7 @@
 ```
 
 - 前端 `axios baseURL = '/api'`（相对路径）→ 客户端零改动。
-- 2021 已被占用（例如开发时 `mvn spring-boot:run` 在跑）→ 直接复用，不会重复启动。
+- 2021 已被占用（例如开发时后端 jar 已在运行）→ 直接复用，不会重复启动。
 - 后端由客户端拉起时，工作目录为 `client/backend/`（jar 所在目录）。
 
 ## 目录
@@ -65,7 +65,7 @@ npm run dist
 
 ```powershell
 mvn -q -DskipTests package
-Copy-Item target\pulverize-1.0-SNAPSHOT.jar client\backend\ -Force
+Copy-Item pulverize-service\target\pulverize-1.0-SNAPSHOT.jar client\backend\ -Force
 # 再 npm run dist 重新打包；开发期 npm start 直接生效
 ```
 

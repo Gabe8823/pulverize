@@ -75,12 +75,13 @@
 mysql -uroot -p < sql/init.sql     # 创建 run_ai 库（表结构也会在启动时自动补齐/升级）
 ```
 
-数据源默认 `localhost:3306/run_ai`（root/[REDACTED]，见 `src/main/resources/application-dev.yml` 按需修改）。Redis/RabbitMQ/OSS 为可选中间件，开发环境已自动排除，不安装也能启动。
+数据源默认 `localhost:3306/run_ai`（root/[REDACTED]，见 `pulverize-service/src/main/resources/application-dev.yml` 按需修改）。Redis/RabbitMQ/OSS 为可选中间件，开发环境已自动排除，不安装也能启动。
 
 ### 2. 启动后端（端口 2021）
 
 ```bash
-mvn spring-boot:run
+mvn -q -DskipTests package                                    # package parent + common/api/service
+java -jar pulverize-service/target/pulverize-1.0-SNAPSHOT.jar # run (:2021)
 ```
 
 ### 3. 启动前端（端口 2020）
@@ -130,7 +131,7 @@ claude mcp add --transport http pulverize http://localhost:2021/api/mcp \
 ### 7. 桌面客户端（Windows）
 
 1. 前往 **[Releases](../../releases)** 下载 `Pulverize Setup x.y.z.exe`，双击安装（生成桌面快捷方式）
-2. 运行要求：本机安装 **Java 21+**（客户端在 2021 端口无后端时会自动 `java -jar` 拉起内置后端；若开发时 `mvn spring-boot:run` 正在运行则直接复用）
+2. 运行要求：本机安装 **Java 21+**（客户端在 2021 端口无后端时会自动 `java -jar` 拉起内置后端；若开发时后端已在 2021 端口运行则直接复用）
 3. 客户端特性：
    - 自定义标题栏（拖拽移动窗口 + 原生红黑白窗口按钮）
    - **背景切换**：默认 / 红黑 / 墨石灰 / 云白 / 自定义图片（本地压缩存储，深色背景自动强制浅色文字保证可读）
@@ -152,11 +153,11 @@ claude mcp add --transport http pulverize http://localhost:2021/api/mcp \
 
 ```
 pulverize/
-├─ src/main/java/com/run/        # Spring Boot 后端
+├─ pulverize-service/src/main/java/com/run/        # Spring Boot 后端
 │  ├─ common/ai/                 # AiClient / AiConfigProvider（依赖倒置）
 │  ├─ common/math/               # VDOT 计算等纯算法
 │  └─ module/                    # activity/analysis/plan/goal/report/ai/mcp/platform...
-├─ src/main/resources/           # application.yml（:2021）+ application-dev.yml
+├─ pulverize-service/src/main/resources/           # application.yml（:2021）+ application-dev.yml
 ├─ sql/init.sql                  # 数据库初始化
 ├─ frontend/                     # Vue 3 + TS + Vite
 │  └─ src/
@@ -175,8 +176,8 @@ pulverize/
 
 ```bash
 # 后端
-mvn spring-boot:run                          # 开发运行（:2021）
-mvn -q -DskipTests package                  # 打 jar：target/pulverize-1.0-SNAPSHOT.jar
+java -jar pulverize-service/target/pulverize-1.0-SNAPSHOT.jar   # run (:2021)
+mvn -q -DskipTests package                  # package (parent + common/api/service)
 
 # 前端
 cd frontend
@@ -185,7 +186,7 @@ npx vue-tsc -b && npx vite build            # 类型检查 + 产物 frontend/dis
 
 # 桌面客户端
 cd client
-cp ../target/pulverize-1.0-SNAPSHOT.jar backend/   # 更新内置后端（后端有改动时）
+cp ../pulverize-service/target/pulverize-1.0-SNAPSHOT.jar backend/   # 更新内置后端（后端有改动时）
 npm run dist                                 # 产出 release/Pulverize Setup x.y.z.exe
 ```
 
