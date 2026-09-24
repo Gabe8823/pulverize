@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/run_ai?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    username: root
+    password: ${RUNAI_DB_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      # 不设password即无密码连接
+  autoconfigure:
+    # 开发环境排除未安装的中间件，防止启动阻塞
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    # RabbitMQ同理，开发环境不阻塞
+    listener:
+      simple:
+        auto-startup: false
+
+# Aliyun OSS (dev 环境不启用)
+aliyun:
+  oss:
+    enabled: false
+    endpoint: oss-cn-hangzhou.aliyuncs.com
+    bucket: running-dev
+    domain: https://running-dev.oss-cn-hangzhou.aliyuncs.com
+    access-key: dev-key
+    secret-key: dev-secret
+
+# AI (开发环境)
+ai:
+  api:
+    url: https://api.deepseek.com/chat/completions
+    key: sk-placeholder
+    model: deepseek-chat

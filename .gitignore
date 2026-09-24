@@ -1,0 +1,23 @@
+# Node
+node_modules/
+.vite/
+
+# Build artifacts
+frontend/dist/
+target/
+*.class
+
+# Electron packaging output & bundled jar
+client/release/
+client/backend/*.jar
+
+# Runtime / local state
+*.log
+runai_mcp_token.txt
+runai_jwt.txt
+
+# IDE / OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
