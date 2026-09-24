@@ -1,4 +1,4 @@
-# RunAI 项目账户信息
+# Pulverize 项目账户信息
 
 > 本文档记录开发环境中各服务的访问地址和账户密码，仅供开发使用。
 
@@ -17,7 +17,7 @@
 
 ```
 # Claude Code
-claude mcp add --transport http run-ai http://localhost:2021/api/mcp \
+claude mcp add --transport http pulverize http://localhost:2021/api/mcp \
   --header "Authorization: Bearer <MCP令牌>"
 ```
 
@@ -124,7 +124,7 @@ SHOW TABLES;
 ```bash
 # 启动后端 (打包后运行)
 mvn package -DskipTests
-java -jar target/run-ai-1.0-SNAPSHOT.jar --spring.profiles.active=dev
+java -jar target/pulverize-1.0-SNAPSHOT.jar --spring.profiles.active=dev
 
 # 启动后端 (开发模式，热加载)
 mvn spring-boot:run
@@ -141,7 +141,7 @@ mysql -uroot [REDACTED] < sql/init.sql
 ## 项目结构概览
 
 ```
-run-ai/
+pulverize/
 ├── src/main/java/com/run/          # 后端 Java 代码
 │   ├── RunAiApplication.java       # 启动类
 │   ├── common/                     # 公共模块 (配置/异常/工具)

@@ -2,7 +2,7 @@
   <div class="page auth-page">
     <div class="auth-wrap">
       <div class="auth-brand">
-        <span class="auth-brand__mark">Run</span><span class="auth-brand__rest">AI</span>
+        <span class="auth-brand__mark">P</span><span class="auth-brand__rest">ulverize</span>
       </div>
 
       <div class="a-card auth-card">

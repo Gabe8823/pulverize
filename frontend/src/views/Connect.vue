@@ -459,7 +459,7 @@ async function generateToken(): Promise<void> {
 /* ---- 接入配置（永远使用占位符，不放真实令牌） ---- */
 const mcpConfigSnippet = `{
   "mcpServers": {
-    "run-ai": {
+    "pulverize": {
       "url": "http://localhost:2021/api/mcp",
       "headers": { "Authorization": "Bearer YOUR_MCP_TOKEN" }
     }

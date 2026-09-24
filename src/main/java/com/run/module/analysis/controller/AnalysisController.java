@@ -2,6 +2,7 @@ package com.run.module.analysis.controller;
 
 import com.run.common.result.R;
 import com.run.module.analysis.dto.AnalysisResultVO;
+import com.run.module.analysis.dto.MuscleMapVO;
 import com.run.module.analysis.dto.VdotVO;
 import com.run.module.analysis.service.AnalysisService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,5 +37,13 @@ public class AnalysisController {
     public R<VdotVO> getVdot(HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
         return R.ok(analysisService.getVdot(userId));
+    }
+
+    /** 肌肉热力图：近 N 天肌群负荷估算（运动类型 × 时长 × 强度，参考高驰 App） */
+    @GetMapping("/muscle-map")
+    public R<MuscleMapVO> muscleMap(HttpServletRequest request,
+                                    @RequestParam(name = "days", defaultValue = "28") Integer days) {
+        Long userId = (Long) request.getAttribute("userId");
+        return R.ok(analysisService.getMuscleMap(userId, days));
     }
 }

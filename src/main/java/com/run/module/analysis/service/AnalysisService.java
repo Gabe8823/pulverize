@@ -1,6 +1,7 @@
 package com.run.module.analysis.service;
 
 import com.run.module.analysis.dto.AnalysisResultVO;
+import com.run.module.analysis.dto.MuscleMapVO;
 import com.run.module.analysis.dto.VdotVO;
 
 public interface AnalysisService {
@@ -13,4 +14,7 @@ public interface AnalysisService {
 
     /** 跑力指数 VDOT：基于全部历史数据中最优有氧表现推算 */
     VdotVO getVdot(Long userId);
+
+    /** 肌肉热力图：近 days 天按运动类型/时长/强度估算的肌群负荷（参考高驰 App） */
+    MuscleMapVO getMuscleMap(Long userId, Integer days);
 }

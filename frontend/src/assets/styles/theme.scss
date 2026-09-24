@@ -1,5 +1,5 @@
 /* ============================================================
-   RunAI · Apple（apple.com.cn）风格设计系统
+   Pulverize · Apple（apple.com.cn）风格设计系统
    - 已完全移除 Element Plus：纯 CSS 变量 + 自研组件类（.a-*）
    - SF Pro / PingFang 字体栈、黑白主色 + 红色强调色（红黑白主题）
    - 暗黑模式：html[data-theme="dark"] 覆盖变量，挂载前由 index.html 脚本应用防闪烁
@@ -37,7 +37,7 @@
   --a-scrollbar-hover: rgba(0, 0, 0, 0.32);
   --a-nav-bg: rgba(255, 255, 255, 0.72);
   --a-toast-bg: rgba(255, 255, 255, 0.85);
-  --a-font: -apple-system, BlinkMacSystemFont, 'SF Pro SC', 'SF Pro Text',
+  --a-font: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro SC', 'SF Pro Text',
     'SF Pro Display', 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei',
     Helvetica, Arial, sans-serif;
 }
@@ -1059,12 +1059,19 @@ textarea.a-input {
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 }
 
-/* 通用卡片 */
+/* 通用卡片（毛玻璃：半透明底 + 背景模糊；不支持 backdrop-filter 时回退纯色） */
 .a-card {
-  background: var(--a-surface);
+  background: rgba(255, 255, 255, 0.64);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-radius: var(--a-radius-card);
   padding: 32px;
   box-shadow: var(--a-shadow-card);
+}
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .a-card {
+    background: var(--a-surface);
+  }
 }
 .a-card.hoverable {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -1427,4 +1434,36 @@ html[data-bg='cloud'] ::-webkit-scrollbar-thumb {
 }
 html[data-bg='cloud'] ::-webkit-scrollbar-thumb:hover {
   background-color: rgba(0, 0, 0, 0.32);
+}
+
+/* ============================================================
+   Pulverize 补充：毛玻璃卡片深浅适配 · 客户端固定标题栏偏移 ·
+   下拉层级 · 字体细节
+   ============================================================ */
+html[data-theme='dark'] .a-card,
+html[data-bg='red-black'] .a-card,
+html[data-bg='graphite'] .a-card,
+html[data-bg='image'] .a-card {
+  background: rgba(29, 29, 31, 0.62);
+}
+html[data-bg='cloud'] .a-card {
+  background: rgba(255, 255, 255, 0.66);
+}
+
+/* 客户端固定标题栏：导航栏吸附基线下移 40px（与 App.vue 的 .app-frame--client 对应） */
+html[data-client] {
+  --client-tb-h: 40px;
+}
+
+/* 下拉菜单必须高于内容、卡片与图表悬浮层 */
+.a-dropdown__menu {
+  z-index: 300;
+}
+
+/* 字体细节：全局数字等宽对齐 + 优化断字渲染 */
+html {
+  text-rendering: optimizeLegibility;
+}
+body {
+  font-variant-numeric: tabular-nums;
 }

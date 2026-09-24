@@ -1,6 +1,6 @@
-# RunAI · 个人运动数据分析与 AI 教练
+# Pulverize · 个人运动数据分析与 AI 教练
 
-![](https://img.shields.io/github/v/release/Gabe8823/run-ai)
+![](https://img.shields.io/github/v/release/Gabe8823/pulverize)
 
 把高驰（COROS）等运动平台的跑步数据聚合到本地，生成**数据看板、跑步分析（VDOT/心率区间/分段）、训练计划、运动目标、周期报告**，并由 **AI 教练**给出复盘与建议；同时通过 **MCP 协议**把你的数据安全开放给 Claude、Cursor 等 AI 助手。
 
@@ -45,7 +45,7 @@
 │  浏览器 :2020 │───▶│ Vite dev server（/api 代理 → :2021）      │
 └───────────────┘    └──────────────────────────────────────────┘
 ┌───────────────┐    ┌──────────────────────────────────────────┐
-│ RunAI.exe     │───▶│ 本地静态服务 :5219（内嵌 frontend/dist）   │
+│ Pulverize.exe     │───▶│ 本地静态服务 :5219（内嵌 frontend/dist）   │
 │（Electron）   │    │   /api/* → 同源代理 127.0.0.1:2021        │
 └───────────────┘    │ 后端未运行时自动 java -jar（等待页轮询）    │
                      └───────────────────┬──────────────────────┘
@@ -119,7 +119,7 @@ npm run dev        # 打开 http://localhost:2020
 2. 添加 MCP 客户端：
 
 ```bash
-claude mcp add --transport http run-ai http://localhost:2021/api/mcp \
+claude mcp add --transport http pulverize http://localhost:2021/api/mcp \
   --header "Authorization: Bearer <MCP令牌>"
 ```
 
@@ -129,7 +129,7 @@ claude mcp add --transport http run-ai http://localhost:2021/api/mcp \
 
 ### 7. 桌面客户端（Windows）
 
-1. 前往 **[Releases](../../releases)** 下载 `RunAI Setup x.y.z.exe`，双击安装（生成桌面快捷方式）
+1. 前往 **[Releases](../../releases)** 下载 `Pulverize Setup x.y.z.exe`，双击安装（生成桌面快捷方式）
 2. 运行要求：本机安装 **Java 21+**（客户端在 2021 端口无后端时会自动 `java -jar` 拉起内置后端；若开发时 `mvn spring-boot:run` 正在运行则直接复用）
 3. 客户端特性：
    - 自定义标题栏（拖拽移动窗口 + 原生红黑白窗口按钮）
@@ -151,7 +151,7 @@ claude mcp add --transport http run-ai http://localhost:2021/api/mcp \
 ## 目录结构
 
 ```
-run-ai/
+pulverize/
 ├─ src/main/java/com/run/        # Spring Boot 后端
 │  ├─ common/ai/                 # AiClient / AiConfigProvider（依赖倒置）
 │  ├─ common/math/               # VDOT 计算等纯算法
@@ -167,7 +167,7 @@ run-ai/
 ├─ client/                       # Electron 桌面客户端
 │  ├─ main.js                    # 本地服务 + /api 代理 + 后端编排 + GPU/菜单/快捷键
 │  ├─ preload.js                 # 仅暴露 window.runai.isClient
-│  └─ backend/run-ai-*.jar       # 打包内置后端（随 extraResources 带入）
+│  └─ backend/pulverize-*.jar       # 打包内置后端（随 extraResources 带入）
 └─ ACCOUNTS.md                   # 本地开发地址与 MCP 速查（仅开发用）
 ```
 
@@ -176,7 +176,7 @@ run-ai/
 ```bash
 # 后端
 mvn spring-boot:run                          # 开发运行（:2021）
-mvn -q -DskipTests package                  # 打 jar：target/run-ai-1.0-SNAPSHOT.jar
+mvn -q -DskipTests package                  # 打 jar：target/pulverize-1.0-SNAPSHOT.jar
 
 # 前端
 cd frontend
@@ -185,8 +185,8 @@ npx vue-tsc -b && npx vite build            # 类型检查 + 产物 frontend/dis
 
 # 桌面客户端
 cd client
-cp ../target/run-ai-1.0-SNAPSHOT.jar backend/   # 更新内置后端（后端有改动时）
-npm run dist                                 # 产出 release/RunAI Setup x.y.z.exe
+cp ../target/pulverize-1.0-SNAPSHOT.jar backend/   # 更新内置后端（后端有改动时）
+npm run dist                                 # 产出 release/Pulverize Setup x.y.z.exe
 ```
 
 国内网络打包 Electron 时可走镜像：`ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`、`ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-binaries/`。

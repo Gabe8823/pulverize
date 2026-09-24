@@ -43,7 +43,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class McpService {
 
-    public static final String SERVER_NAME = "run-ai-mcp";
+    public static final String SERVER_NAME = "pulverize-mcp";
     public static final String SERVER_VERSION = "1.0.0";
     public static final String DEFAULT_PROTOCOL_VERSION = "2025-06-18";
 
@@ -139,7 +139,7 @@ public class McpService {
                 "protocolVersion", params.path("protocolVersion").asText(DEFAULT_PROTOCOL_VERSION),
                 "capabilities", m("tools", m("listChanged", false)),
                 "serverInfo", m("name", SERVER_NAME, "version", SERVER_VERSION),
-                "instructions", "RunAI 是个人跑步数据分析与 AI 教练平台。" +
+                "instructions", "Pulverize 是个人运动数据分析与 AI 教练平台。" +
                         "调用工具可读取当前用户的跑步活动、周统计、分析结论、训练目标与训练计划，" +
                         "并可触发第三方平台（如高驰 COROS）数据同步。" +
                         "给出训练建议前，请先用 get_weekly_stats 和 list_activities 了解用户近期负荷。"

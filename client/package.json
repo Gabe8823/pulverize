@@ -1,9 +1,9 @@
 {
-  "name": "run-ai-client",
-  "version": "1.0.0",
-  "description": "RunAI 桌面客户端：本地静态前端 + /api 同源代理 + 后端自动拉起",
+  "name": "pulverize-client",
+  "version": "1.1.0",
+  "description": "Pulverize 桌面客户端：本地静态前端 + /api 同源代理 + 后端自动拉起",
   "main": "main.js",
-  "author": "RunAI",
+  "author": "Pulverize",
   "license": "MIT",
   "scripts": {
     "start": "electron .",
@@ -15,8 +15,8 @@
     "electron-builder": "^26.0.0"
   },
   "build": {
-    "appId": "com.runai.client",
-    "productName": "RunAI",
+    "appId": "com.pulverize.client",
+    "productName": "Pulverize",
     "directories": {
       "output": "release",
       "buildResources": "build"
@@ -48,8 +48,8 @@
       "perMachine": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "RunAI",
-      "uninstallDisplayName": "RunAI 智能跑步"
+      "shortcutName": "Pulverize",
+      "uninstallDisplayName": "Pulverize 运动分析"
     }
   }
 }

@@ -1,7 +1,7 @@
 <template>
   <header class="client-tb">
-    <span class="client-tb-logo">R</span>
-    <span class="client-tb-name">RunAI</span>
+    <span class="client-tb-logo">P</span>
+    <span class="client-tb-name">Pulverize</span>
     <span class="client-tb-tag">桌面版</span>
 
     <div class="client-tb-bg">
@@ -109,7 +109,10 @@ async function onFile(e: Event) {
 
 <style scoped>
 .client-tb {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 2000;
   box-sizing: border-box;
   height: 40px;
@@ -125,16 +128,18 @@ async function onFile(e: Event) {
   font-family: var(--a-font, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif);
 }
 .client-tb-logo {
-  width: 20px;
-  height: 20px;
-  border-radius: 5px;
-  background: #e30613;
+  width: 26px;
+  height: 15px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ff3040 0%, #e30613 60%, #a90410 100%);
   color: #fff;
-  font-size: 12px;
+  font-size: 9.5px;
   font-weight: 800;
+  letter-spacing: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 0 10px rgba(227, 6, 19, 0.55);
 }
 .client-tb-name {
   font-size: 13px;

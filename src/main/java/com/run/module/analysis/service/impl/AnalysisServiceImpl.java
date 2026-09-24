@@ -11,6 +11,7 @@ import com.run.module.analysis.entity.RunningAnalysis;
 import com.run.module.analysis.mapper.RunningAnalysisMapper;
 import com.run.module.analysis.service.AnalysisService;
 import com.run.common.math.VdotCalculator;
+import com.run.module.analysis.dto.MuscleMapVO;
 import com.run.module.analysis.dto.VdotVO;
 import com.run.module.running.entity.RunningActivity;
 import com.run.module.running.entity.RunningLap;
@@ -21,6 +22,7 @@ import com.run.module.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -663,5 +665,139 @@ public class AnalysisServiceImpl implements AnalysisService {
             // 解析失败则返回空
         }
         return vo;
+    }
+
+    /* ---------------- 肌肉热力图（参考高驰 App 肌群负荷口径） ---------------- */
+
+    /** 肌群元数据：key -> {中文名, 人体视图 FRONT/BACK} */
+    private static final String[][] MUSCLE_META = {
+            {"chest", "胸大肌", "FRONT"},
+            {"shoulders", "三角肌", "FRONT"},
+            {"biceps", "肱二头肌", "FRONT"},
+            {"core", "腹部核心", "FRONT"},
+            {"quads", "股四头肌", "FRONT"},
+            {"tibialis", "胫骨前肌", "FRONT"},
+            {"lats", "背阔肌", "BACK"},
+            {"glutes", "臀大肌", "BACK"},
+            {"hamstrings", "腘绳肌", "BACK"},
+            {"calves", "小腿三头肌", "BACK"}
+    };
+
+    /** 满负荷参考值：约等于 28 天规律训练下主肌群的负荷当量（load >= REF 记 100 分，超出封顶） */
+    private static final double MUSCLE_LOAD_REF = 300.0;
+
+    @Override
+    public MuscleMapVO getMuscleMap(Long userId, Integer days) {
+        int window = days == null ? 28 : Math.max(1, Math.min(days, 365));
+        LocalDateTime start = LocalDateTime.now().minusDays(window);
+        List<RunningActivity> activities = runningStats.listByRange(userId, start, LocalDateTime.now());
+
+        Map<String, Double> load = new LinkedHashMap<>();
+        for (String[] meta : MUSCLE_META) {
+            load.put(meta[0], 0.0);
+        }
+
+        int totalMinutes = 0;
+        for (RunningActivity a : activities) {
+            Integer durSec = a.getDurationSeconds();
+            if (durSec == null || durSec <= 0) {
+                continue;
+            }
+            double minutes = durSec / 60.0;
+            totalMinutes += (int) Math.round(minutes);
+            double intensity = muscleIntensity(a);
+            for (Map.Entry<String, Double> e : muscleWeights(a.getActivityType()).entrySet()) {
+                load.merge(e.getKey(), minutes * intensity * e.getValue(), Double::sum);
+            }
+        }
+
+        List<MuscleMapVO.MuscleItem> muscles = new ArrayList<>();
+        for (String[] meta : MUSCLE_META) {
+            double v = load.getOrDefault(meta[0], 0.0);
+            int score = (int) Math.min(100, Math.round(v / MUSCLE_LOAD_REF * 100));
+            MuscleMapVO.MuscleItem item = new MuscleMapVO.MuscleItem();
+            item.setKey(meta[0]);
+            item.setName(meta[1]);
+            item.setView(meta[2]);
+            item.setScore(score);
+            if (score >= 70) {
+                item.setLevel("HIGH");
+                item.setLevelText("高负荷");
+            } else if (score >= 40) {
+                item.setLevel("MEDIUM");
+                item.setLevelText("中等");
+            } else if (score >= 12) {
+                item.setLevel("LOW");
+                item.setLevelText("轻度");
+            } else {
+                item.setLevel("IDLE");
+                item.setLevelText("未激活");
+            }
+            muscles.add(item);
+        }
+        muscles.sort((x, y) -> y.getScore() - x.getScore());
+
+        MuscleMapVO vo = new MuscleMapVO();
+        vo.setDays(window);
+        vo.setActivityCount(activities.size());
+        vo.setTotalMinutes(totalMinutes);
+        vo.setMuscles(muscles);
+        return vo;
+    }
+
+    /** 单次活动强度 0.50~1.00：优先心率口径（均值相对峰值），无心率按中等强度 0.62 */
+    private double muscleIntensity(RunningActivity a) {
+        Integer avg = a.getAvgHeartRate();
+        if (avg == null || avg <= 0) {
+            return 0.62;
+        }
+        Integer max = a.getMaxHeartRate();
+        double hrMax = (max != null && max > avg + 5) ? max : 190;
+        double pct = (avg - 70) / Math.max(30.0, hrMax - 70);
+        return Math.max(0.50, Math.min(1.0, 0.5 + 0.5 * pct));
+    }
+
+    /** 运动类型 -> 肌群负荷权重：覆盖跑/骑/力量/游泳；未知类型按全身轻度参与 */
+    private Map<String, Double> muscleWeights(String activityType) {
+        String t = activityType == null ? "" : activityType.toUpperCase();
+        if (t.contains("RUN") || t.contains("JOG")) {
+            return Map.ofEntries(
+                    Map.entry("quads", 0.24), Map.entry("glutes", 0.19),
+                    Map.entry("calves", 0.16), Map.entry("hamstrings", 0.13),
+                    Map.entry("core", 0.10), Map.entry("tibialis", 0.07),
+                    Map.entry("lats", 0.03), Map.entry("shoulders", 0.03),
+                    Map.entry("biceps", 0.03), Map.entry("chest", 0.02));
+        }
+        if (t.contains("RIDE") || t.contains("CYCL")) {
+            return Map.ofEntries(
+                    Map.entry("quads", 0.32), Map.entry("glutes", 0.26),
+                    Map.entry("calves", 0.16), Map.entry("hamstrings", 0.12),
+                    Map.entry("core", 0.08), Map.entry("tibialis", 0.02),
+                    Map.entry("lats", 0.01), Map.entry("shoulders", 0.01),
+                    Map.entry("biceps", 0.01), Map.entry("chest", 0.01));
+        }
+        if (t.contains("STRENGTH") || t.contains("TRAIN") || t.contains("HIIT")
+                || t.contains("GYM") || t.contains("WORKOUT")) {
+            return Map.ofEntries(
+                    Map.entry("chest", 0.16), Map.entry("shoulders", 0.15),
+                    Map.entry("lats", 0.15), Map.entry("biceps", 0.10),
+                    Map.entry("core", 0.12), Map.entry("quads", 0.12),
+                    Map.entry("hamstrings", 0.08), Map.entry("glutes", 0.06),
+                    Map.entry("calves", 0.04), Map.entry("tibialis", 0.02));
+        }
+        if (t.contains("SWIM")) {
+            return Map.ofEntries(
+                    Map.entry("lats", 0.26), Map.entry("shoulders", 0.20),
+                    Map.entry("core", 0.16), Map.entry("chest", 0.12),
+                    Map.entry("biceps", 0.10), Map.entry("hamstrings", 0.06),
+                    Map.entry("quads", 0.05), Map.entry("glutes", 0.03),
+                    Map.entry("calves", 0.01), Map.entry("tibialis", 0.01));
+        }
+        return Map.ofEntries(
+                Map.entry("quads", 0.14), Map.entry("glutes", 0.12),
+                Map.entry("hamstrings", 0.11), Map.entry("core", 0.13),
+                Map.entry("calves", 0.10), Map.entry("chest", 0.09),
+                Map.entry("shoulders", 0.09), Map.entry("lats", 0.09),
+                Map.entry("biceps", 0.08), Map.entry("tibialis", 0.05));
     }
 }

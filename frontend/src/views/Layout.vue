@@ -4,7 +4,7 @@
     <header class="nav-bar">
       <div class="nav-inner">
         <router-link to="/dashboard" class="nav-logo">
-          <span class="nav-logo-mark">Run</span>AI
+          <span class="nav-logo-mark">P</span>ulverize
         </router-link>
 
         <nav class="nav-links">
@@ -164,7 +164,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
 /* ---- 毛玻璃顶栏 ---- */
 .nav-bar {
   position: sticky;
-  top: 0;
+  top: var(--client-tb-h, 0px);
   z-index: 100;
   background: var(--a-nav-bg);
   backdrop-filter: saturate(180%) blur(20px);

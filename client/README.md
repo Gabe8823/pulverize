@@ -1,11 +1,11 @@
-# RunAI 桌面客户端（Electron）
+# Pulverize 桌面客户端（Electron）
 
 红黑白主题的 Windows 桌面客户端：打包后的前端静态资源 + 本地 `/api` 同源代理 + 后端自动拉起。
 
 ## 架构
 
 ```
-┌─────────────── RunAI.exe（Electron 窗口）───────────────┐
+┌─────────────── Pulverize.exe（Electron 窗口）───────────────┐
 │  本地静态服务 127.0.0.1:5219                            │
 │    ├─ /            → 内嵌 frontend/dist（SPA）          │
 │    └─ /api/*       → 代理 127.0.0.1:2021（同源，无 CORS）│
@@ -28,7 +28,7 @@ client/
 ├─ build_icon.ps1    # 生成 build/icon.png（PowerShell System.Drawing）
 ├─ build/icon.png    # 应用图标（红底白 R，256×256）
 ├─ backend/          # 后端 jar 放这里（打包时随 extraResources 带入）
-│  └─ run-ai-1.0-SNAPSHOT.jar
+│  └─ pulverize-1.0-SNAPSHOT.jar
 └─ release/          # 打包产物（git 不入库）
 ```
 
@@ -50,7 +50,7 @@ npm start            # electron .
 cd client
 npm run icon         # 可选：重新生成图标
 npm run dist         # electron-builder --win --x64
-# 产物：release\RunAI Setup 1.0.0.exe（NSIS 一键安装，装完生成桌面快捷方式）
+# 产物：release\Pulverize Setup 1.0.0.exe（NSIS 一键安装，装完生成桌面快捷方式）
 ```
 
 国内网络建议走镜像（本机已配置 npmmirror registry 时二进制也走镜像）：
@@ -65,7 +65,7 @@ npm run dist
 
 ```powershell
 mvn -q -DskipTests package
-Copy-Item target\run-ai-1.0-SNAPSHOT.jar client\backend\ -Force
+Copy-Item target\pulverize-1.0-SNAPSHOT.jar client\backend\ -Force
 # 再 npm run dist 重新打包；开发期 npm start 直接生效
 ```
 

@@ -59,3 +59,28 @@ export interface VdotResult {
   equivalents: Record<string, number> | null
   zones: VdotZone[] | null
 }
+
+/** 肌群负荷条目（GET /api/analysis/muscle-map） */
+export interface MuscleItem {
+  /** 肌群 key：chest / shoulders / biceps / core / quads / tibialis / lats / glutes / hamstrings / calves */
+  key: string
+  /** 中文名 */
+  name: string
+  /** 人体视图：FRONT 正面 / BACK 背面 */
+  view: string
+  /** 负荷分数 0-100 */
+  score: number
+  /** 等级：HIGH / MEDIUM / LOW / IDLE */
+  level: string
+  /** 等级中文：高负荷 / 中等 / 轻度 / 未激活 */
+  levelText: string
+}
+
+/** 肌肉热力图（GET /api/analysis/muscle-map?days=N） */
+export interface MuscleMap {
+  days: number
+  activityCount: number
+  totalMinutes: number
+  /** 按分数降序 */
+  muscles: MuscleItem[]
+}

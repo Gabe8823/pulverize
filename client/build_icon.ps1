@@ -21,14 +21,14 @@ $path.CloseFigure()
 $red = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255, 227, 6, 19))
 $g.FillPath($red, $path)
 
-# White bold "R"
+# White bold "P"
 $font = New-Object System.Drawing.Font('Arial Black', 150, [System.Drawing.FontStyle]::Bold, [System.Drawing.GraphicsUnit]::Pixel)
 $white = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::White)
 $sf = New-Object System.Drawing.StringFormat
 $sf.Alignment = 'Center'
 $sf.LineAlignment = 'Center'
 $rect = New-Object System.Drawing.RectangleF 0, 8, $w, ($h - 16)
-$g.DrawString('R', $font, $white, $rect, $sf)
+$g.DrawString('P', $font, $white, $rect, $sf)
 
 if (-not (Test-Path 'build')) { New-Item -ItemType Directory -Path 'build' | Out-Null }
 $bmp.Save((Join-Path $PWD 'build\icon.png'), [System.Drawing.Imaging.ImageFormat]::Png)

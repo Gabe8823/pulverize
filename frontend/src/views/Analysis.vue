@@ -199,6 +199,9 @@
         <div class="a-empty__sub">选择上方任意一条跑步记录，点击「开始分析」。</div>
       </div>
     </section>
+
+    <!-- 肌肉热力图：独立于单次分析，近 N 天肌群负荷（参考高驰 App） -->
+    <MuscleHeatmap />
   </div>
 </template>
 
@@ -206,6 +209,7 @@
 import { computed, onMounted, ref } from 'vue'
 import AButton from '@/components/ui/AButton.vue'
 import ASelect from '@/components/ui/ASelect.vue'
+import MuscleHeatmap from '@/components/analysis/MuscleHeatmap.vue'
 import { runningApi } from '@/api/running'
 import { analysisApi } from '@/api/analysis'
 import { toast } from '@/utils/toast'

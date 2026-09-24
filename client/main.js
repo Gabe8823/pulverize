@@ -1,6 +1,6 @@
 'use strict'
 /**
- * RunAI 桌面客户端
+ * Pulverize 桌面客户端
  * - 性能：优先硬件加速（ANGLE D3D11 + 忽略 GPU blocklist + GPU 光栅化 + 零拷贝），
  *   避免部分机型 GPU 被拉黑后走软件渲染导致的整窗卡顿
  * - 原生感：移除默认菜单（File/Edit/View/Window）、隐藏系统标题栏，
@@ -259,7 +259,7 @@ function createWindow(startUrl) {
     minHeight: 680,
     backgroundColor: '#f5f5f7',
     show: false,
-    title: 'RunAI · 智能跑步数据分析',
+    title: 'Pulverize · 智能跑步数据分析',
     titleBarStyle: 'hidden',
     titleBarOverlay: {
       color: '#16161a',
