@@ -16,6 +16,27 @@ client/backend/*.jar
 runai_mcp_token.txt
 runai_jwt.txt
 
+# Secrets & local config (never commit)
+.env
+.env.*
+*.local.yml
+application-local.yml
+.pulverize/
+*.secret
+*.pem
+*.p12
+*.jks
+*.keystore
+runai_jwt.txt
+runai_mcp_token.txt
+
+# Personal data & dumps
+*.fit
+*.gpx
+*.tcx
+*.dump
+*.sql.gz
+
 # IDE / OS
 .idea/
 *.iml

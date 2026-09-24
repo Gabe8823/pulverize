@@ -1,0 +1,19 @@
+#!/bin/sh
+# Pulverize pre-commit: block staged changes that contain secrets (gitleaks).
+# Enable once per clone:  git config core.hooksPath scripts/git-hooks
+GITLEAKS_BIN="${GITLEAKS_BIN:-$LOCALAPPDATA/Programs/gitleaks/gitleaks.exe}"
+
+if [ -x "$GITLEAKS_BIN" ]; then
+  "$GITLEAKS_BIN" protect --staged --redact --no-banner --config .gitleaks.toml || {
+    echo "[pre-commit] gitleaks found staged secrets - commit blocked." >&2
+    exit 1
+  }
+elif command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --redact --no-banner --config .gitleaks.toml || {
+    echo "[pre-commit] gitleaks found staged secrets - commit blocked." >&2
+    exit 1
+  }
+else
+  echo "[pre-commit] gitleaks not installed - secret scan skipped (see docs/SECURITY_AUDIT.md)." >&2
+fi
+exit 0

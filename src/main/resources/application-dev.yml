@@ -2,6 +2,8 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/run_ai?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
     username: root
+    # 密码不入库：优先环境变量 RUNAI_DB_PASSWORD，其次 ~/.pulverize/db.password（本地 keystore），
+    # 默认值 root 仅供全新环境首次初始化，本机真实密码已轮换并存于本地文件
     password: ${RUNAI_DB_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
@@ -26,19 +28,19 @@ spring:
       simple:
         auto-startup: false
 
-# Aliyun OSS (dev 环境不启用)
+# Aliyun OSS (dev 环境不启用；真实密钥一律走环境变量，禁止写入仓库)
 aliyun:
   oss:
     enabled: false
     endpoint: oss-cn-hangzhou.aliyuncs.com
     bucket: running-dev
     domain: https://running-dev.oss-cn-hangzhou.aliyuncs.com
-    access-key: dev-key
-    secret-key: dev-secret
+    access-key: ${ALIYUN_OSS_ACCESS_KEY:dev-key}
+    secret-key: ${ALIYUN_OSS_SECRET_KEY:dev-secret}
 
-# AI (开发环境)
+# AI（兜底示例：任意 OpenAI 兼容接口均可；真实地址/模型/密钥在页面「AI 服务配置」配置，或经环境变量注入）
 ai:
   api:
-    url: https://api.deepseek.com/chat/completions
-    key: sk-placeholder
-    model: deepseek-chat
+    url: ${AI_API_URL:https://api.deepseek.com/chat/completions}
+    key: ${AI_API_KEY:sk-placeholder}
+    model: ${AI_API_MODEL:deepseek-chat}

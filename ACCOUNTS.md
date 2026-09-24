@@ -1,6 +1,6 @@
 # Pulverize 项目账户信息
 
-> 本文档记录开发环境中各服务的访问地址和账户密码，仅供开发使用。
+> 本文档记录开发环境中各服务的访问地址与接入说明，**不含任何明文密码**（凭据一律存放于本机 `~/.pulverize/`），仅供开发使用。
 
 ---
 
@@ -49,11 +49,12 @@ curl -X POST http://localhost:2021/api/mcp \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}}'
 ```
 
-## AI 摘要与计划推理（DeepSeek）
+## AI 摘要与计划推理（任意 OpenAI 兼容服务）
 
-- 配置位置：`src/main/resources/application-dev.yml` → `ai.api.url` / `ai.api.key` / `ai.api.model`
-- 当前 `key: sk-placeholder` 为占位符：AI 不可用时自动降级为规则文案（分析页「AI 教练点评」、计划页「AI 推理过程」始终有内容，只是非大模型生成）
-- 配置真实 DeepSeek key（`https://api.deepseek.com/chat/completions`，模型 `deepseek-chat`）后重启后端即走真实 AI，无需改代码
+- 配置入口（任一即可）：页面「设置 → AI 服务配置」（服务商预设一键填充）/ 报告页「配置 AI 服务」链接 / 环境变量 `AI_API_URL`、`AI_API_MODEL`、`AI_API_KEY`
+- **服务商不写死**：DeepSeek、Kimi、智谱、通义、OpenAI 等任何 OpenAI 兼容接口均可使用
+- 未配置密钥时自动降级为规则文案（分析页「AI 教练点评」、计划页「AI 推理过程」始终有内容，只是非大模型生成）
+- 示例（DeepSeek）：接口 `https://api.deepseek.com/chat/completions`，模型 `deepseek-chat`
 
 ## 运动平台连接（可扩展架构）
 
@@ -67,10 +68,13 @@ curl -X POST http://localhost:2021/api/mcp \
 
 ## 测试用户账号
 
-| 用户名 | 密码 | 昵称 | 说明 |
-|--------|------|------|------|
-| 123 | [REDACTED] | admin | 之前测试注册的账号 |
-| testrunner | [REDACTED] | 跑步小将 | 标准测试账号 |
+| 用户名 | 昵称 | 说明 |
+|--------|------|------|
+| 123 | admin | 本地测试账号 |
+| testrunner | 跑步小将 | 本地测试账号 |
+
+- 密码**不在仓库中记录**：已轮换为强密码，明文见本机 `~/.pulverize/accounts.local.md`
+- 本机 MySQL root 密码同样只存于 `~/.pulverize/db.password`（或环境变量 `RUNAI_DB_PASSWORD`）
 
 ## 数据库
 
@@ -80,17 +84,14 @@ curl -X POST http://localhost:2021/api/mcp \
 | 主机 | localhost:3306 |
 | 数据库名 | run_ai |
 | 用户名 | root |
-| 密码 | root |
+| 密码 | 不入库：`~/.pulverize/db.password`（或环境变量 `RUNAI_DB_PASSWORD`）；全新环境首次初始化默认 root |
 | 字符集 | utf8mb4 (表级别) / UTF-8 (JDBC连接) |
 
 ### 连接方式
 
 ```bash
-# 命令行连接
-mysql -uroot [REDACTED]
-
-# 切换到项目数据库
-USE run_ai;
+# 命令行连接（-p 后不带密码，回车后交互输入；真实密码见 ~/.pulverize/db.password）
+mysql -uroot -p run_ai
 
 # 查看所有表
 SHOW TABLES;
@@ -134,8 +135,8 @@ cd frontend
 npm install
 npm run dev
 
-# 重新建库建表
-mysql -uroot [REDACTED] < sql/init.sql
+# 重新建库建表（-p 回车后交互输入密码）
+mysql -uroot -p run_ai < sql/init.sql
 ```
 
 ## 项目结构概览

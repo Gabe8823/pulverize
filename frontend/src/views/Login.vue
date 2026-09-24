@@ -48,7 +48,7 @@
         </p>
       </div>
 
-      <p class="caption auth-caption">演示账号：123 / [REDACTED]</p>
+      <p class="caption auth-caption">本地演示环境 · 数据仅保存在你的机器上</p>
     </div>
   </div>
 </template>

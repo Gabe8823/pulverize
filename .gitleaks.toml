@@ -1,0 +1,14 @@
+# Pulverize gitleaks config - extends the built-in default rule set
+title = "pulverize-gitleaks"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Global false-positive allowlist"
+paths = [
+  '''package-lock\.json$''',
+  '''\.woff2?$''',
+  '''docs/SECURITY_AUDIT\.md$''',
+  '''\.idea/''',
+]
