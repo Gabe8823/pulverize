@@ -90,7 +90,7 @@
 ### A.3 推送与同步（最终 SHA）
 
 - 通道：GitHub :443（SNI 间歇阻断）→ **SSH :22 + Deploy Key**（id `164279852`，读写已验证）；REST 走 `api.github.com`
-- `main` = **`c4945d2`**；`v1.0.0` = **`bdbfc16`**（deref `bd01c0a`）；`v1.1.0` = **`80eaa20`**（均 forced update）
+- 清史 force-push：`main` → **`c4945d2`**（forced；此后新提交会继续前进，以远端 `refs/heads/main` 实时值为准）；tag 为最终稳定值、不再变动：`v1.0.0` → **`bdbfc16`**（deref `bd01c0a`）、`v1.1.0` → **`80eaa20`**
 - 原仓库 fetch/reset/tags 同步一致（local == remote），工作区 clean；旧代 commit 在远端变为不可达对象，由平台 GC 回收（无法经 API 主动加速；历史克隆残留需持有者自行清理）
 
 ### A.4 Release 资产重建（F4 闭环）
